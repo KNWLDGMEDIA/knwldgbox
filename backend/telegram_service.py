@@ -2,7 +2,7 @@ import asyncio
 import os
 from typing import Any
 
-from routerClass import routerClass
+import routerClass
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 from fastapi import WebSocket
