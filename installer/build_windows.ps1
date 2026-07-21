@@ -14,7 +14,7 @@
       5. Downloads ffmpeg                             -> payload\tools\ffmpeg
       6. Downloads Chromium via Playwright (optional) -> payload\playwright-browsers
       7. Downloads the WebView2 bootstrapper          -> payload\
-      8. Generates icon.ico from app\public\hero.png
+      8. Copies icon.ico from app\src\assets\knwldgbox.ico
       9. Compiles the installer with ISCC.exe
 
     Prerequisites on the BUILD machine (Windows 10/11 x64):
@@ -91,7 +91,7 @@ if (-not $SkipFrontend) {
     Write-Step "Building frontend (Vue/Vite)"
     $npm = Get-Command npm -ErrorAction SilentlyContinue
     if (-not $npm) { throw "npm not found. Install Node.js first: https://nodejs.org" }
-    # The installed app resolves the API from window.location.port — make sure
+    # The installed app resolves the API from window.location.port â€” make sure
     # no build-time port override leaks in.
     Remove-Item Env:VITE_API_PORT -ErrorAction SilentlyContinue
     Push-Location (Join-Path $Root 'app')
@@ -199,15 +199,15 @@ Invoke-Download "https://go.microsoft.com/fwlink/p/?LinkId=2124703" `
     (Join-Path $Payload 'MicrosoftEdgeWebview2Setup.exe')
 
 # ------------------------------------------------------------ 10. icon ------
-Write-Step "Generating icon.ico"
-$HeroPng = Join-Path $Root 'app\public\hero.png'
-if (Test-Path $HeroPng) {
-    & $Py -m pip install --no-index --find-links $Wheels Pillow | Out-Host
-    Assert-ExitCode "pip install Pillow (build-time)"
-    & $Py -c "from PIL import Image; Image.open(r'$HeroPng').convert('RGBA').save(r'$Payload\icon.ico', sizes=[(16,16),(24,24),(32,32),(48,48),(64,64),(128,128),(256,256)])"
-    Assert-ExitCode "icon generation"
+Write-Step "Copying icon.ico"
+$SrcIco = Join-Path $Root 'app\src\assets\knwldgbox.ico'
+$DstIco = Join-Path $Payload 'icon.ico'
+
+if (Test-Path $SrcIco) {
+    Copy-Item $SrcIco $DstIco
+    Write-Host "Copied $SrcIco -> $DstIco"
 } else {
-    Write-Warning "app\public\hero.png not found — installer will use the default icon."
+    Write-Warning "app\src\assets\knwldgbox.ico not found - installer will use default icon."
 }
 
 # -------------------------------------------------------- 11. Inno Setup ----
@@ -219,20 +219,20 @@ if ($PayloadOnly) {
 
 Write-Step "Compiling installer with Inno Setup"
 $Iscc = $InnoSetupCompiler
-if (-not $Iscc) {
+if (!$Iscc) {
     $candidates = @(
-        "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
-        "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+        "${env:ProgramFiles(x86)}\Inno Setup 7\ISCC.exe",
+        "${env:ProgramFiles}\Inno Setup 7\ISCC.exe"
     )
     $Iscc = $candidates | Where-Object { Test-Path $_ } | Select-Object -First 1
-    if (-not $Iscc) {
+    if (!$Iscc) {
         $cmd = Get-Command ISCC.exe -ErrorAction SilentlyContinue
         if ($cmd) { $Iscc = $cmd.Source }
     }
 }
-if (-not $Iscc) {
-    Write-Warning "Inno Setup 6 not found. Install it from https://jrsoftware.org/isdl.php"
-    Write-Warning "Then run:  ISCC.exe /DAppVersion=$Version `"$IssFile`""
+
+if (!$Iscc) {
+    Write-Warning "Inno Setup 6 not found."
     Write-Host "Payload ready at: $Payload" -ForegroundColor Green
     exit 0
 }
@@ -241,5 +241,9 @@ if (-not $Iscc) {
 Assert-ExitCode "Inno Setup compilation"
 
 Write-Step "Done"
-Get-ChildItem (Join-Path $InstallerDir 'Output\*.exe') |
-    ForEach-Object { Write-Host "Installer created: $($_.FullName) ($([math]::Round($_.Length/1MB)) MB)" -ForegroundColor Green }
+$exes = Get-ChildItem (Join-Path $InstallerDir 'Output\*.exe')
+foreach ($exe in $exes) {
+    $sz = [math]::Round($exe.Length / 1048576)
+    $msg = "Installer created: " + $exe.FullName + " (" + $sz + " MB)"
+    Write-Host $msg -ForegroundColor Green
+}

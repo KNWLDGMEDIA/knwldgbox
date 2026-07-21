@@ -1,7 +1,11 @@
 import asyncio
 import json
+import os
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from config import tool_path
+
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
 router = APIRouter()
 
@@ -32,7 +36,8 @@ async def holehe_websocket(websocket: WebSocket):
             process = await asyncio.create_subprocess_exec(
                 *cmd_args,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
+                creationflags=CREATE_NO_WINDOW,
             )
             
             # Read stdout line by line

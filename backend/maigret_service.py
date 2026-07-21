@@ -4,6 +4,9 @@ from fastapi import WebSocket, APIRouter
 import re
 import os
 
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
+
 router = APIRouter()
 
 from config import MAIGRET_DIR
@@ -50,6 +53,7 @@ class MaigretService:
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 limit=1024 * 1024,  # 1 MB buffer limit
+                creationflags=CREATE_NO_WINDOW,
             )
 
             current_site = None

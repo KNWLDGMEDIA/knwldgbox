@@ -10,6 +10,9 @@ from pathlib import Path
 from urllib.parse import urlparse
 import time
 
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
+
 router = APIRouter()
 
 
@@ -45,6 +48,7 @@ async def _install_playwright_chromium():
         sys.executable, "-m", "playwright", "install", "chromium",
         stdout=asyncio.subprocess.DEVNULL,
         stderr=asyncio.subprocess.DEVNULL,
+        creationflags=CREATE_NO_WINDOW,
     )
     await process.wait()
 

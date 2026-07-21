@@ -6,6 +6,9 @@ import base64
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
+
 from ghunt.helpers.utils import get_httpx_client
 from ghunt.helpers import auth
 from ghunt.objects.base import GHuntCreds
@@ -31,7 +34,8 @@ async def scan_ghunt_email(payload: GHuntPayload):
         process = await asyncio.create_subprocess_exec(
             sys.executable, wrapper_path, email,
             stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE
+            stderr=asyncio.subprocess.PIPE,
+            creationflags=CREATE_NO_WINDOW,
         )
         stdout, stderr = await process.communicate()
         stdout_str = stdout.decode('utf-8')

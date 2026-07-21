@@ -1,6 +1,10 @@
 import asyncio
 import json
+import os
 from fastapi import WebSocket
+
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
 class SherlockService:
     async def handle_websocket(self, websocket: WebSocket):
@@ -22,7 +26,8 @@ class SherlockService:
                 process = await asyncio.create_subprocess_exec(
                     "sherlock", username, "--print-found", "--timeout", str(timeout),
                     stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
+                    stderr=asyncio.subprocess.PIPE,
+                    creationflags=CREATE_NO_WINDOW,
                 )
                 
                 while True:

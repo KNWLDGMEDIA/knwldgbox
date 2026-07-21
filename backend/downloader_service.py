@@ -7,6 +7,9 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from config import DOWNLOADS_DIR
 
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
+
 router = APIRouter()
 
 @router.get("/api/downloads/file/{filename}")
@@ -41,9 +44,9 @@ def open_downloads_dir():
         if platform.system() == "Windows":
             os.startfile(str(DOWNLOADS_DIR))
         elif platform.system() == "Darwin":
-            subprocess.Popen(["open", str(DOWNLOADS_DIR)])
+            subprocess.Popen(["open", str(DOWNLOADS_DIR)], creationflags=CREATE_NO_WINDOW)
         else:
-            subprocess.Popen(["xdg-open", str(DOWNLOADS_DIR)])
+            subprocess.Popen(["xdg-open", str(DOWNLOADS_DIR)], creationflags=CREATE_NO_WINDOW)
         return {"status": "success"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
@@ -86,7 +89,8 @@ async def downloader_ws(websocket: WebSocket):
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT
+                stderr=asyncio.subprocess.STDOUT,
+                creationflags=CREATE_NO_WINDOW,
             )
             
             await websocket.send_json({"type": "info", "text": f"Initializing download for {url}..."})

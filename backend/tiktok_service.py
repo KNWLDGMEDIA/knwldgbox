@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import sys
 import re
 from pathlib import Path
@@ -7,6 +8,9 @@ from pathlib import Path
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
+# Prevent black console windows from flashing on Windows when spawning subprocesses
+CREATE_NO_WINDOW = 0x08000000 if os.name == "nt" else 0
 
 router = APIRouter()
 
@@ -35,7 +39,8 @@ async def tiktok_hashtag_endpoint(websocket: WebSocket):
             install_proc = await asyncio.create_subprocess_exec(
                 *install_cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT
+                stderr=asyncio.subprocess.STDOUT,
+                creationflags=CREATE_NO_WINDOW,
             )
             await install_proc.wait()
 
@@ -50,7 +55,8 @@ async def tiktok_hashtag_endpoint(websocket: WebSocket):
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.STDOUT
+                stderr=asyncio.subprocess.STDOUT,
+                creationflags=CREATE_NO_WINDOW,
             )
 
             await websocket.send_json({"type": "info", "text": f"Initializing TikTok scraper for #{hashtag}..."})
