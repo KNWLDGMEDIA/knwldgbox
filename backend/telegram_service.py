@@ -2,6 +2,7 @@ import asyncio
 import os
 from typing import Any
 
+from routerClass import routerClass
 from telethon import TelegramClient
 from telethon.errors import SessionPasswordNeededError
 from fastapi import WebSocket
@@ -14,7 +15,7 @@ class TelegramService:
         self.phone_code_hash: str | None = None
         self.monitoring_task: asyncio.Task | None = None
         self._is_polling = False
-
+        self.obj_class_router = routerClass.routerFunctionPipe("backend")
     def get_credentials(self):
         return os.getenv('TG_API_ID'), os.getenv('TG_API_HASH'), os.getenv('TG_PHONE')
 
@@ -27,9 +28,12 @@ class TelegramService:
         if self.client:
             await self.client.disconnect()
 
-        from config import SESSION_NAME
-        self.client = TelegramClient(SESSION_NAME, int(api_id), api_hash)
-        
+        try:
+            from config import SESSION_NAME
+            self.client = TelegramClient(SESSION_NAME, int(api_id), api_hash)
+        except:
+            self.obj_class_router["utils"]().error_with_reason("Please configure you're Telegram api key!")
+
         try:
             await self.client.connect()
             if not await self.client.is_user_authorized():
