@@ -4,11 +4,73 @@ import base64
 from fastapi import APIRouter
 from pydantic import BaseModel
 import os
+import sys
 import uuid
+from pathlib import Path
 from urllib.parse import urlparse
 import time
 
 router = APIRouter()
+
+
+def _find_playwright_chromium() -> str | None:
+    """Locate the Chromium binary downloaded by Playwright, if any."""
+    bases = []
+    env_path = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    if env_path:
+        bases.append(Path(env_path))
+    if os.name == "nt":
+        local_appdata = os.environ.get("LOCALAPPDATA")
+        if local_appdata:
+            bases.append(Path(local_appdata) / "ms-playwright")
+    else:
+        bases.append(Path.home() / ".cache" / "ms-playwright")
+        bases.append(Path.home() / "Library" / "Caches" / "ms-playwright")
+
+    exe_rel = Path("chrome-win") / "chrome.exe" if os.name == "nt" else Path("chrome-linux") / "chrome"
+    for base in bases:
+        if not base.is_dir():
+            continue
+        # Newest revision first
+        for chromium_dir in sorted(base.glob("chromium-*"), reverse=True):
+            exe = chromium_dir / exe_rel
+            if exe.exists():
+                return str(exe)
+    return None
+
+
+async def _install_playwright_chromium():
+    """Download Playwright's Chromium (first run on machines without Chrome)."""
+    process = await asyncio.create_subprocess_exec(
+        sys.executable, "-m", "playwright", "install", "chromium",
+        stdout=asyncio.subprocess.DEVNULL,
+        stderr=asyncio.subprocess.DEVNULL,
+    )
+    await process.wait()
+
+
+async def _start_browser():
+    """
+    Start a headless browser. Prefers the system Chrome/Chromium; falls back to
+    Playwright's Chromium (downloading it on first use if necessary).
+    """
+    try:
+        return await uc.start(headless=True)
+    except Exception:
+        pass  # No usable system browser — try Playwright's Chromium below
+
+    exe = _find_playwright_chromium()
+    if not exe:
+        await _install_playwright_chromium()
+        exe = _find_playwright_chromium()
+
+    if exe:
+        return await uc.start(headless=True, browser_executable_path=exe)
+
+    raise RuntimeError(
+        "No Chrome/Chromium browser found. Install Google Chrome, "
+        "or run 'python -m playwright install chromium' once."
+    )
 
 class ArchiveRequest(BaseModel):
     url: str
@@ -39,8 +101,8 @@ async def archive_url_endpoint(req: ArchiveRequest):
     png_path = f"{archive_path_base}.png"
 
     try:
-        # Launch chromium
-        browser = await uc.start(headless=True)
+        # Launch chromium (system browser, or Playwright's as fallback)
+        browser = await _start_browser()
         
         try:
             # Go to URL

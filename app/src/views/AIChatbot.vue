@@ -99,7 +99,7 @@ async function sendMessage() {
   const apiMessages = messages.value.map(m => ({ role: m.role, content: m.content }))
   
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/chat`, {
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 

@@ -111,7 +111,7 @@ function loadStats() {
 
 async function loadGraphsData() {
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs`)
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs`)
     if (res.ok) {
       const data = await res.json()
       const graphs = data.graphs || []
@@ -126,7 +126,7 @@ async function loadGraphsData() {
 
 async function checkBackendHealth() {
   try {
-    const response = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs`, { method: 'GET' })
+    const response = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs`, { method: 'GET' })
     backendStatus.value = response.ok ? 'online' : 'error'
   } catch {
     backendStatus.value = 'offline'

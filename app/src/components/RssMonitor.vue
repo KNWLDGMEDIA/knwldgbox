@@ -55,7 +55,7 @@ async function fetchFileFeed(fileObject = null) {
       throw new Error("No file data available")
     }
 
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/rss/upload`, {
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/rss/upload`, {
       method: 'POST',
       body: formData
     })
@@ -86,7 +86,7 @@ async function fetchFeed() {
   errorMsg.value = ''
 
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/rss?url=${encodeURIComponent(feedUrl.value)}`)
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/rss?url=${encodeURIComponent(feedUrl.value)}`)
     const data = await res.json()
 
     if (res.ok && data.status !== 'error') {

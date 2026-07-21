@@ -60,7 +60,7 @@ const geoData = ref(null)
 const errorMsg = ref(null)
 const expandedRequest = ref(null)
 
-const API_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api`
+const API_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api`
 
 const masonryItems = computed(() => {
   const items = []

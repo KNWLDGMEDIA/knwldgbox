@@ -12,12 +12,51 @@ Usage:
 """
 
 import argparse
+import os
 import sys
 import threading
 import time
 import socket
 
 import uvicorn
+
+from config import APP_DIR, DATA_DIR, TOOL_DIRS
+
+
+def _setup_environment():
+    """Make bundled CLI tools, ffmpeg and browsers discoverable by the backend."""
+    # Bundled CLI tools (sherlock, maigret, yt-dlp, holehe) and ffmpeg.
+    # Services invoke these by bare name via subprocess → they must be on PATH.
+    extra_paths = [str(d) for d in TOOL_DIRS]
+
+    ffmpeg_dir = APP_DIR.parent / 'tools' / 'ffmpeg'
+    if ffmpeg_dir.is_dir():
+        extra_paths.append(str(ffmpeg_dir))
+
+    if extra_paths:
+        os.environ["PATH"] = os.pathsep.join(extra_paths) + os.pathsep + os.environ.get("PATH", "")
+
+    # Use the Playwright browsers bundled by the Windows installer, if present.
+    # (Default per-user location in %LOCALAPPDATA% is used otherwise.)
+    bundled_browsers = APP_DIR.parent / 'playwright-browsers'
+    if bundled_browsers.is_dir() and 'PLAYWRIGHT_BROWSERS_PATH' not in os.environ:
+        os.environ['PLAYWRIGHT_BROWSERS_PATH'] = str(bundled_browsers)
+
+
+def _redirect_logs():
+    """
+    Under pythonw.exe (Windows install) sys.stdout/sys.stderr are None, which
+    would silently swallow every uvicorn/backend error. Redirect to a log file.
+    """
+    if sys.stdout is not None and sys.stderr is not None:
+        return
+    log_dir = DATA_DIR / 'logs'
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = open(log_dir / 'knwldgbox.log', 'a', encoding='utf-8', errors='replace')
+    if sys.stdout is None:
+        sys.stdout = log_file
+    if sys.stderr is None:
+        sys.stderr = log_file
 
 
 def is_port_available(port: int) -> bool:
@@ -55,6 +94,9 @@ def wait_for_backend(port: int, timeout: float = 15.0):
 
 
 def main():
+    _redirect_logs()
+    _setup_environment()
+
     parser = argparse.ArgumentParser(description="KNWLDGBox Desktop Launcher")
     parser.add_argument("--port", type=int, default=8000, help="Backend port (default: 8000)")
     parser.add_argument("--dev", action="store_true", help="Dev mode: run backend only, no window")

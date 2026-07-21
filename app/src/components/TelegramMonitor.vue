@@ -38,7 +38,7 @@ function handleMouseEnter(channel, msg) {
   // Add a small delay so we don't spam downloads if the user just moves the mouse across the screen
   hoverTimer = setTimeout(() => {
     activeMediaType.value = msg.media_type || 'photo'
-    activeMediaUrl.value = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/telegram/media/${channel}/${msg.id}`
+    activeMediaUrl.value = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/telegram/media/${channel}/${msg.id}`
   }, 400)
 }
 

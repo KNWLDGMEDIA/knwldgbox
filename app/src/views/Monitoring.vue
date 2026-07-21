@@ -64,7 +64,7 @@ async function summarizeToday() {
       time: item.time
     }))
 
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/rss/summarize`, {
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/rss/summarize`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ entries: recentEntries, language: locale.value })
@@ -189,7 +189,7 @@ watch(aggregatedFeed, async (newFeed) => {
     if (fullText.length < 10) continue
     
     try {
-      const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/extract_locations`, {
+      const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/extract_locations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: fullText })

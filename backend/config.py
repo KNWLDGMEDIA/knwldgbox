@@ -14,10 +14,29 @@ from pathlib import Path
 
 def _is_installed() -> bool:
     """Detect if we're running from a system-installed location."""
-    app_dir = Path(__file__).resolve().parent
-    # If running from /opt or /usr or C:\Program Files, we're installed
-    installed_prefixes = ["/opt/", "/usr/", "C:\\Program Files"]
-    return any(str(app_dir).startswith(p) for p in installed_prefixes)
+    if getattr(sys, 'frozen', False):
+        return True
+
+    app_dir = os.path.normcase(str(Path(__file__).resolve().parent))
+
+    # If running from /opt or /usr or a Windows program-files dir, we're installed
+    installed_prefixes = ["/opt/", "/usr/"]
+    if os.name == 'nt':
+        for env_var in ("ProgramFiles", "ProgramFiles(x86)", "ProgramW6432"):
+            prefix = os.environ.get(env_var)
+            if prefix:
+                installed_prefixes.append(prefix)
+        # Per-user installs (e.g. %LOCALAPPDATA%\Programs\KNWLDGBox)
+        local_appdata = os.environ.get("LOCALAPPDATA")
+        if local_appdata:
+            installed_prefixes.append(os.path.join(local_appdata, "Programs"))
+        # Fallback if env vars are somehow missing
+        installed_prefixes.append("C:\\Program Files")
+
+    return any(
+        app_dir.startswith(os.path.normcase(p))
+        for p in installed_prefixes if p
+    )
 
 
 def get_app_dir() -> Path:
@@ -69,16 +88,29 @@ for _d in [ARCHIVES_DIR, DOWNLOADS_DIR, GRAPHS_DIR, MAIGRET_DIR, TIKTOK_DIR]:
 
 # ── Tool resolution ──────────────────────────────────────────────
 
-# When installed, CLI tools live inside the bundled venv
-VENV_BIN = APP_DIR / 'venv' / ('Scripts' if os.name == 'nt' else 'bin')
+_BIN_SUBDIR = 'Scripts' if os.name == 'nt' else 'bin'
+
+# Candidate directories that may contain CLI tool shims (sherlock, maigret,
+# yt-dlp, holehe, ...), most specific first:
+# - backend/venv/(Scripts|bin): legacy bundled-venv layout
+# - <install root>/python/Scripts: bundled standalone CPython (Windows installer)
+VENV_BIN = APP_DIR / 'venv' / _BIN_SUBDIR
+BUNDLED_PYTHON_BIN = APP_DIR.parent / 'python' / _BIN_SUBDIR
+
+# Only directories that actually exist (empty in dev mode → PATH is used)
+TOOL_DIRS = [p for p in (VENV_BIN, BUNDLED_PYTHON_BIN) if p.is_dir()]
 
 
 def tool_path(name: str) -> str:
     """
-    Resolve a CLI tool name to its full path inside the bundled venv.
+    Resolve a CLI tool name to its full path inside a bundled environment.
     Falls back to the bare command name (system PATH lookup) in dev mode.
+    On Windows, pip shims are '<name>.exe', so try that suffix first.
     """
-    candidate = VENV_BIN / name
-    if candidate.exists():
-        return str(candidate)
+    candidates = [f"{name}.exe", name] if os.name == 'nt' else [name]
+    for directory in TOOL_DIRS:
+        for candidate_name in candidates:
+            candidate = directory / candidate_name
+            if candidate.exists():
+                return str(candidate)
     return name  # Fallback: rely on system PATH (dev mode / conda / venv activated)

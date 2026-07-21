@@ -33,8 +33,8 @@ function hidePreview() {
   hoverImg.value = null
 }
 
-const API_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api`
-const ASSET_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/archives`
+const API_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api`
+const ASSET_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/archives`
 
 async function fetchArchives() {
   isLoading.value = true

@@ -1,5 +1,5 @@
-const API_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api`
-const WS_BASE = `ws://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/ws`
+const API_BASE = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api`
+const WS_BASE = `ws://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/ws`
 
 export const apiService = {
   async saveSettings(settings) {

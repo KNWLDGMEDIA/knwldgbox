@@ -53,7 +53,7 @@ let isSwitching = false
 
 onMounted(async () => {
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs`)
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs`)
     if (res.ok) {
       const data = await res.json()
       if (data.graphs && data.graphs.length > 0) {
@@ -72,7 +72,7 @@ window.addEventListener('graph-updated', () => {
   if (activeFile.value) {
     loadGraph(activeFile.value.filename, true)
   } else {
-    fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs`)
+    fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs`)
       .then(res => res.json())
       .then(data => {
         if (data.graphs && data.graphs.length > 0) {
@@ -96,7 +96,7 @@ async function createNewGraph() {
   const payload = { nodes: [], edges: [], nextNodeId: 1 }
   
   try {
-    await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs/${newGraph.filename}`, {
+    await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs/${newGraph.filename}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -114,7 +114,7 @@ async function loadGraph(filename, force = false) {
   isSwitching = true
   
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs/${filename}`)
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs/${filename}`)
     if (res.ok) {
       const { data } = await res.json()
       nodes.value = data.nodes || []
@@ -149,7 +149,7 @@ async function confirmDeleteGraph() {
   showDeleteModal.value = false
   
   try {
-    await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs/${filename}`, { method: 'DELETE' })
+    await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs/${filename}`, { method: 'DELETE' })
     files.value = files.value.filter(f => f.filename !== filename)
     if (activeFile.value?.filename === filename) {
       activeFile.value = null
@@ -178,7 +178,7 @@ async function confirmRename(file) {
   }
   
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs/${file.filename}/rename`, {
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs/${file.filename}/rename`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ newName: newFilename.value })
@@ -276,7 +276,7 @@ function triggerFileInput() {
           nextNodeId: data.nextNodeId || 1
         }
         
-        await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs/${filename}`, {
+        await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs/${filename}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -310,7 +310,7 @@ watch([nodes, edges], () => {
   if (autoSaveTimeout) clearTimeout(autoSaveTimeout)
   autoSaveTimeout = setTimeout(async () => {
     try {
-      await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/graphs/${activeFile.value.filename}`, {
+      await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/graphs/${activeFile.value.filename}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

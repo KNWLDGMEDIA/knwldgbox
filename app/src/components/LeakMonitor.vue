@@ -41,7 +41,7 @@ async function fetchLeaks() {
   isLoading.value = true
   errorMsg.value = ''
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/dataleaks/frenchbreaches`)
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/dataleaks/frenchbreaches`)
     const data = await res.json()
     if (data.status === 'success') {
       leaks.value = data.data

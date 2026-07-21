@@ -19,7 +19,7 @@ const authError = ref('')
 
 onMounted(async () => {
   try {
-    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/ghunt/status`)
+    const res = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/ghunt/status`)
     if (res.ok) {
       const data = await res.json()
       if (!data.authenticated) {
@@ -49,7 +49,7 @@ async function fetchGHuntData() {
   ghuntData.value = null
 
   try {
-    const response = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/ghunt/email`, {
+    const response = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/ghunt/email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: username.value })
@@ -93,7 +93,7 @@ async function authenticateGHunt() {
   authError.value = ''
   
   try {
-    const response = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/ghunt/login`, {
+    const response = await fetch(`http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/ghunt/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ b64_token: b64Token.value.trim() })

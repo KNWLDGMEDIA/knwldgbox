@@ -64,3 +64,8 @@ backend/testcom.txt
 .idea/
 .DS_Store
 Thumbs.db
+
+# Windows installer build artifacts
+installer/payload/
+installer/.downloads/
+installer/Output/

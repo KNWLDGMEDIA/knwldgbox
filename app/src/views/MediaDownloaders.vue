@@ -137,7 +137,7 @@ function formatSize(bytes) {
 }
 
 function downloadFileToPc(filename) {
-  const url = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || 8000}/api/downloads/file/${encodeURIComponent(filename)}`
+  const url = `http://${window.location.hostname}:${import.meta.env.VITE_API_PORT || (import.meta.env.DEV ? 8000 : window.location.port) || 8000}/api/downloads/file/${encodeURIComponent(filename)}`
   const a = document.createElement('a')
   a.href = url
   a.download = filename

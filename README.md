@@ -160,6 +160,30 @@ The compiled assets will be placed in the `app/dist` directory.
 
 ---
 
+## 🪟 Windows Installer
+
+You can build a self-contained Windows installer (`.exe`) that bundles Python, all dependencies, ffmpeg, Chromium, and a desktop launcher — no prerequisites needed on the target machine.
+
+**On a Windows machine** (with Node.js and [Inno Setup 6](https://jrsoftware.org/isdl.php) installed):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File installer\build_windows.ps1
+```
+
+The installer is created at `installer\Output\KNWLDGBox-Setup-<version>.exe`.
+
+Useful options:
+- `-Version 1.2.0` — set the installer version
+- `-BundleChromium $false` — smaller installer (~170 MB less); the Archives module will then use an installed Chrome or download Chromium on first use
+- `-PayloadOnly` — assemble `installer\payload\` without compiling the `.exe`
+
+Notes:
+- The app installs to `C:\Program Files\KNWLDGBox` and runs in a native desktop window (PyWebView/Edge WebView2).
+- User data (API keys, archives, graphs, downloads) is stored in `%APPDATA%\knwldgbox` and is **not** removed on uninstall.
+- Backend logs (useful for troubleshooting) are at `%APPDATA%\knwldgbox\logs\knwldgbox.log`.
+
+---
+
 ## 🌟 Key Features
 
 <details>
