@@ -7,19 +7,38 @@ import os
 
 class routerClass_:
 
-    def file_class(self, list_py_file, exclude_list, exclude_argument = ["eval","exec","compile","os.system","os.popen","subprocess.run","pickle.load()","pickle.loads()","yaml.load()","marshal.load()","marshal.loads()","shelve.open"]):
+    def check_all(self, node_name, exclude_argument):
+        flag = True
+        if node_name in exclude_argument:
+            flag = False
+        for one_exclude in list(exclude_argument):
+            if node_name.startswith(one_exclude) or node_name.endswith(one_exclude):
+                flag = False
+                break
+        return flag
+
+
+    def file_class(self, list_py_file, exclude_argument = ["eval","exec","compile","os.system","os.popen","subprocess","subprocess.run","pickle","pickle.load","pickle.loads","yaml","yaml.load","marshal","marshal.load","marshal.loads","shelve","shelve.open"]):
+        exclude_argument_ = set(exclude_argument)
         file_with_class = []
         sub_file = []
         for one_py_file in list_py_file:
             authorize = True
             handle = open(one_py_file,encoding="utf-8")
             tree_file = ast.parse(handle.read())
+            validate_ = True
             for node in ast.walk(tree_file):
-                    if isinstance(node, ast.ClassDef):
+                    if isinstance(node, ast.Import):
+                       for alias in node.names:
+                        validate_ = self.check_all(alias.name, exclude_argument_) 
+                    if isinstance(node, ast.ImportFrom) and validate_ == True:
+                        for alias in node.names:
+                            validate_ = self.check_all(alias.name, exclude_argument_)
+                    if isinstance(node, ast.ClassDef) and validate_ == True:
                         sub_file = [one_py_file, node.name]
                     if isinstance(node, ast.Call):
-                        if isinstance(node.func, ast.Name):
-                            if node.func.id  in set(exclude_argument):
+                        if isinstance(node.func, ast.Name) and validate_ == True:
+                            if node.func.id  in exclude_argument_:
                                 authorize = False
             if authorize == True and len(sub_file) == 2:
                 file_with_class.append(sub_file)
@@ -53,7 +72,7 @@ class routerClass_:
         return dict_class
 
     @cache
-    def pipe_router_class(self, start_dir = "routerClass", start_file =  os.getcwd(), exclude_list = [".git","__pycache__","venv", ".venv","main.py"], depth = 10):
+    def pipe_router_class(self, start_dir = "routerClass", start_file =  os.getcwd(), exclude_list = [".git","__pycache__","venv", ".venv"], depth = 10):
         dict_stack = {"file_python" : [], "dir" : [start_file]}
         already_seen = []
         tick = 0
