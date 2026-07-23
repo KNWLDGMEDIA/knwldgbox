@@ -46,7 +46,7 @@ const tools = [
   { nameKey: 'sidebar.archives', descKey: 'dashboard.toolsDesc.archives', icon: Archive, route: '/archives', color: '#6366F1' },
   { nameKey: 'sidebar.osintMap', descKey: 'dashboard.toolsDesc.osintMap', icon: MapIcon, route: '/osint-map', color: '#EC4899' },
   { nameKey: 'sidebar.knwldgTools', descKey: 'dashboard.toolsDesc.tools', icon: Wrench, route: '/tools', color: '#14B8A6' },
-  { nameKey: 'sidebar.imageForensics', descKey: 'Analyze image metadata and manipulation', icon: Aperture, route: '/forensics', color: '#D946EF' },
+  { nameKey: 'sidebar.imageForensics', descKey: 'dashboard.toolsDesc.imageForensics', icon: Aperture, route: '/image-forensics', color: '#D946EF' },
   { nameKey: 'sidebar.aiChatbot', descKey: 'dashboard.toolsDesc.aiChatbot', icon: MessageSquare, route: '/ai-chat', color: '#0EA5E9' },
   { nameKey: 'sidebar.settings', descKey: 'dashboard.toolsDesc.settings', icon: Settings, route: '/settings', color: '#64748B' },
 ]
