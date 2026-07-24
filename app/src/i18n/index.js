@@ -102,7 +102,8 @@ const messages = {
         osintMap: 'Curated OSINT directory',
         tools: 'Collage & cross creator',
         settings: 'API keys & preferences',
-        aiChatbot: 'Chat and analyze with AI models'
+        aiChatbot: 'Chat and analyze with AI models',
+        imageForensics: 'Analyze image metadata and manipulation'
       },
       categories: {
         people: 'People',
@@ -737,7 +738,8 @@ const messages = {
         osintMap: 'Annuaire OSINT',
         tools: 'Créateur de collage & croisement',
         settings: 'Clés API & préférences',
-        aiChatbot: 'Discutez et analysez avec les IA'
+        aiChatbot: 'Discutez et analysez avec les IA',
+        imageForensics: 'Analysez les métadonnées et manipulations d\'images'
       },
       categories: {
         people: 'Personnes',
