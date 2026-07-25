@@ -79,7 +79,7 @@ function updateBlockConfig(id, newConfig) {
       >
         <template #item="{ element }">
           <div class="draggable-wrapper relative group" v-if="element.type === 'rss_monitor'">
-            <button class="remove-block-btn" @click="removeBlock(element.id)" :title="t('dataLeaks.addNewBlock')">
+            <button class="remove-block-btn" @click="removeBlock(element.id)" :title="t('dataLeaks.removeBlock')">
               <X size="16" />
             </button>
             <RssMonitor

@@ -63,6 +63,7 @@ const messages = {
     dataLeaks: {
       title: 'Data Leaks',
       subtitle: 'Monitor recent breaches and check targets against known databases.',
+      removeBlock: 'Remove Block',
       addNewBlock: 'Add New Target Block',
       selectTool: 'Select Tool',
       customRssFeed: 'Custom RSS Feed',
@@ -701,6 +702,7 @@ const messages = {
     dataLeaks: {
       title: 'Fuites de Données',
       subtitle: 'Surveillez les fuites récentes et vérifiez les cibles dans les bases connues.',
+      removeBlock: 'Supprimer le bloc',
       addNewBlock: 'Ajouter un nouveau bloc cible',
       selectTool: 'Sélectionner un outil',
       customRssFeed: 'Flux RSS personnalisé',
