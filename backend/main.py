@@ -43,7 +43,9 @@ import maigret_service
 import downloader_service
 import archive_service
 import target_service
+import routerClass
 
+obj_class_router = routerClass.routerFunctionPipe("backend")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -128,6 +130,7 @@ async def send_code():
     try:
         return await telegram_service.send_auth_code()
     except Exception as e:
+        obj_class_router["utils"]().error_with_reason("Error with Telegram during auth send code!")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/telegram/auth/verify_code")
@@ -135,6 +138,7 @@ async def verify_code(payload: AuthCodePayload):
     try:
         return await telegram_service.verify_auth_code(payload.code)
     except ValueError as e:
+        obj_class_router["utils"]().error_with_reason("Error with Telegram during auth verify code!")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/extract_locations")
@@ -205,6 +209,7 @@ async def extract_locations(payload: dict):
                 results.append(data)
             time.sleep(1.1)
         except Exception:
+            obj_class_router["utils"]().error_with_reason("Error with geolocator during exctract location!")
             pass
             
     return {"status": "success", "locations": results}
@@ -242,6 +247,7 @@ async def get_rss_feed(url: str):
             "entries": entries
         }
     except Exception as e:
+        obj_class_router["utils"]().error_with_reason("Error durint get rss feed!")
         raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/api/rss/upload")
