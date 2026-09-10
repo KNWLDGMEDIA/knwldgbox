@@ -45,7 +45,7 @@ async function exportToPdf() {
     margin:       10,
     filename:     `${activeTab.value}-social-forensics.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, backgroundColor: document.body.classList.contains('theme-light') ? '#F3F4F6' : '#07090E' },
+    html2canvas:  { scale: 2, useCORS: true, backgroundColor: document.body.classList.contains('light-mode') ? '#F3F4F6' : '#07090E' },
     jsPDF:        { unit: 'mm', format: 'a3', orientation: 'portrait' }
   }
 

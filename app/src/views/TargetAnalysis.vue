@@ -226,7 +226,7 @@ async function exportToPdf() {
     margin:       10,
     filename:     `${domain.value || 'target'}-osint-report.pdf`,
     image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#07090E' },
+    html2canvas:  { scale: 2, useCORS: true, backgroundColor: document.body.classList.contains('light-mode') ? '#F3F4F6' : '#07090E' },
     jsPDF:        { unit: 'mm', format: 'a3', orientation: 'portrait' }
   }
 
